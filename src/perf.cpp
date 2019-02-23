@@ -2,9 +2,9 @@
 // File:			perf.cpp
 // Programmer:		Sunil Arya and David Mount
 // Description:		Methods for performance stats
-// Last modified:	01/04/05 (Version 1.0)
+// Last modified:	01/27/10 (Version 1.1.2)
 //----------------------------------------------------------------------
-// Copyright (c) 1997-2005 University of Maryland and Sunil Arya and
+// Copyright (c) 1997-2010 University of Maryland and Sunil Arya and
 // David Mount.  All Rights Reserved.
 // 
 // This software and related documentation is part of the Approximate
@@ -24,6 +24,8 @@
 //		Changed names to avoid namespace conflicts.
 //		Added flush after printing performance stats to fix bug
 //			in Microsoft Windows version.
+//	Revision 1.1.2  01/27/10
+//		Fixed minor compilation bugs for new versions of gcc
 //----------------------------------------------------------------------
 
 #include <ANN/ANN.h>					// basic ANN includes
@@ -66,7 +68,7 @@ ANNsampStat		ann_rank_err;			// rank error
 //	Routines for statistics.
 //----------------------------------------------------------------------
 
-/*DLL_API*/ void annResetStats(int data_size) // reset stats for a set of queries
+DLL_API void annResetStats(int data_size) // reset stats for a set of queries
 {
 	ann_Ndata_pts  = data_size;
 	ann_visit_lfs.reset();
@@ -80,7 +82,7 @@ ANNsampStat		ann_rank_err;			// rank error
 	ann_rank_err.reset();
 }
 
-/*DLL_API*/ void annResetCounts()				// reset counts for one query
+DLL_API void annResetCounts()				// reset counts for one query
 {
 	ann_Nvisit_lfs = 0;
 	ann_Nvisit_spl = 0;
@@ -90,7 +92,7 @@ ANNsampStat		ann_rank_err;			// rank error
 	ann_Nfloat_ops = 0;
 }
 
-/*DLL_API*/ void annUpdateStats()				// update stats with current counts
+DLL_API void annUpdateStats()				// update stats with current counts
 {
 	ann_visit_lfs += ann_Nvisit_lfs;
 	ann_visit_nds += ann_Nvisit_spl + ann_Nvisit_lfs;
@@ -102,7 +104,7 @@ ANNsampStat		ann_rank_err;			// rank error
 }
 
 										// print a single statistic
-void print_one_stat(const char *title, ANNsampStat s, double div)
+void print_one_stat(const char* title, ANNsampStat s, double div)
 {
 	cout << title << "= [ ";
 	cout.width(9); cout << s.mean()/div			<< " : ";
@@ -111,7 +113,7 @@ void print_one_stat(const char *title, ANNsampStat s, double div)
 	cout.width(9); cout << s.max()/div			<< " >\n";
 }
 
-/*DLL_API*/ void annPrintStats(				// print statistics for a run
+DLL_API void annPrintStats(				// print statistics for a run
 	ANNbool validate)					// true if average errors desired
 {
 	cout.precision(4);					// set floating precision

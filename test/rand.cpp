@@ -1,38 +1,35 @@
 //----------------------------------------------------------------------
-//		File:			rand.cpp
-//		Programmer:		Sunil Arya and David Mount
-//		Last modified:	03/19/05 (Release 1.0)
-//		Description:	Routines for random point generation
+//	File:			rand.cpp
+//	Programmer:		Sunil Arya and David Mount
+//	Description:	Routines for random point generation
+//	Last modified:	08/04/06 (Version 1.1.1)
 //----------------------------------------------------------------------
-// Copyright (c) 1997-1998 University of Maryland and Sunil Arya and David
-// Mount.  All Rights Reserved.
+// Copyright (c) 1997-2005 University of Maryland and Sunil Arya and
+// David Mount.  All Rights Reserved.
 // 
-// This software and related documentation is part of the 
-// Approximate Nearest Neighbor Library (ANN).
+// This software and related documentation is part of the Approximate
+// Nearest Neighbor Library (ANN).  This software is provided under
+// the provisions of the Lesser GNU Public License (LGPL).  See the
+// file ../ReadMe.txt for further information.
 // 
-// Permission to use, copy, and distribute this software and its 
-// documentation is hereby granted free of charge, provided that 
-// (1) it is not a component of a commercial product, and 
-// (2) this notice appears in all copies of the software and
-//	   related documentation. 
-// 
-// The University of Maryland (U.M.) and the authors make no representations
-// about the suitability or fitness of this software for any purpose.  It is
-// provided "as is" without express or implied warranty.
+// The University of Maryland (U.M.) and the authors make no
+// representations about the suitability or fitness of this software for
+// any purpose.  It is provided "as is" without express or implied
+// warranty.
 //----------------------------------------------------------------------
 // History:
-//----------------------------------------------------------------------
-//	History:
 //	Revision 0.1  03/04/98
-//      Initial release
+//		Initial release
 //	Revision 0.2  03/26/98
-//	    Changed random/srandom declarations for SGI's.
+//		Changed random/srandom declarations for SGI's.
 //	Revision 1.0  04/01/05
-//	    annClusGauss centers distributed over [-1,1] rather than [0,1]
-//	    Added annClusOrthFlats distribution
-//	    Changed procedure names to avoid namespace conflicts
-//	    Added annClusFlats distribution
+//		annClusGauss centers distributed over [-1,1] rather than [0,1]
+//		Added annClusOrthFlats distribution
+//		Changed procedure names to avoid namespace conflicts
+//		Added annClusFlats distribution
 //		Added rand/srand option and fixed annRan0() initialization.
+//	Revision 1.1.1  08/04/06
+//		Added planted distribution
 //----------------------------------------------------------------------
 
 #include "rand.h"						// random generator declarations
@@ -318,7 +315,7 @@ void annClusGaussPts(			// clustered-Gaussian distribution
 	ANNpointArray		pa,				// point array (modified)
 	int					n,				// number of points
 	int					dim,			// dimension
-	int					n_col,			// number of colors
+	int					n_clus,			// number of colors
 	ANNbool				new_clust,		// generate new clusters.
 	double				std_dev)		// standard deviation within clusters
 {
@@ -327,9 +324,9 @@ void annClusGaussPts(			// clustered-Gaussian distribution
 	if (clusters == NULL || new_clust) {// need new cluster centers
 		if (clusters != NULL)			// clusters already exist
 			annDeallocPts(clusters);	// get rid of them
-		clusters = annAllocPts(n_col, dim);
+		clusters = annAllocPts(n_clus, dim);
 										// generate cluster center coords
-		for (int i = 0; i < n_col; i++) {
+		for (int i = 0; i < n_clus; i++) {
 			for (int d = 0; d < dim; d++) {
 				clusters[i][d] = (ANNcoord) annRanUnif(-1,1);
 			}
@@ -337,7 +334,7 @@ void annClusGaussPts(			// clustered-Gaussian distribution
 	}
 
 	for (int i = 0; i < n; i++) {
-		int c = annRanInt(n_col);				// generate cluster index
+		int c = annRanInt(n_clus);				// generate cluster index
 		for (int d = 0; d < dim; d++) {
 		  pa[i][d] = (ANNcoord) (std_dev*annRanGauss() + clusters[c][d]);
 		}
@@ -349,7 +346,7 @@ void annClusGaussPts(			// clustered-Gaussian distribution
 //
 //		This distribution consists of a collection points clustered
 //		among a collection of axis-aligned low dimensional flats in
-//		the hypercube [-1,1]^d.  A set of n_col orthogonal flats are
+//		the hypercube [-1,1]^d.  A set of n_clus orthogonal flats are
 //		generated, each whose dimension is a random number between 1
 //		and max_dim.  The points are evenly distributed among the clusters.
 //		For each cluster, we generate points uniformly distributed along
@@ -379,9 +376,9 @@ void annClusGaussPts(			// clustered-Gaussian distribution
 //		selected from a different distribution, e.g. uniform or Gaussian.
 //
 //		We use a little programming trick to generate groups of roughly
-//		equal size.  If n is the total number of points, and n_col is
-//		the number of clusters, then the c-th cluster (0 <= c < n_col)
-//		is given floor((n+c)/n_col) points.  It can be shown that this
+//		equal size.  If n is the total number of points, and n_clus is
+//		the number of clusters, then the c-th cluster (0 <= c < n_clus)
+//		is given floor((n+c)/n_clus) points.  It can be shown that this
 //		will exactly consume all n points.
 //
 //		This procedure makes use of the utility procedure, genOrthFlat
@@ -412,7 +409,7 @@ void annClusOrthFlats(			// clustered along orthogonal flats
 	ANNpointArray		pa,				// point array (modified)
 	int					n,				// number of points
 	int					dim,			// dimension
-	int					n_col,			// number of colors
+	int					n_clus,			// number of colors
 	ANNbool				new_clust,		// generate new clusters.
 	double				std_dev,		// standard deviation within clusters
 	int					max_dim)		// maximum dimension of the flats
@@ -423,9 +420,9 @@ void annClusOrthFlats(			// clustered along orthogonal flats
 		if (control != NULL) {					// clusters already exist
 			annDeallocPts(control);				// get rid of them
 		}
-		control = annAllocPts(n_col, dim);
+		control = annAllocPts(n_clus, dim);
 
-		for (int c = 0; c < n_col; c++) {		// generate clusters
+		for (int c = 0; c < n_clus; c++) {		// generate clusters
 			int n_dim = 1 + annRanInt(max_dim); // number of dimensions in flat
 			for (int d = 0; d < dim; d++) {		// generate side locations
 												// prob. of picking next dim
@@ -441,8 +438,8 @@ void annClusOrthFlats(			// clustered along orthogonal flats
 		}
 	}
 	int offset = 0;								// offset in pa array
-	for (int c = 0; c < n_col; c++) {			// generate clusters
-		int pick = (n+c)/n_col;					// number of points to pick
+	for (int c = 0; c < n_clus; c++) {			// generate clusters
+		int pick = (n+c)/n_clus;				// number of points to pick
 												// generate the points
 		genOrthFlat(pa+offset, pick, dim, control[c], std_dev);
 		offset += pick;							// increment offset
@@ -462,19 +459,20 @@ void annClusOrthFlats(			// clustered along orthogonal flats
 //		dimensions).
 //
 //		The distribution is given the number of clusters or "colors"
-//		(n_col), maximum number of dimensions (max_dim) of the lower
-//		dimensional subspace, a "small" standard deviation (std_dev_small),
-//		and a "large" standard deviation range (std_dev_lo, std_dev_hi).
+//		(n_clus), maximum number of dimensions (max_dim) of the lower
+//		dimensional subspace, a "small" standard deviation
+//		(std_dev_small), and a "large" standard deviation range
+//		(std_dev_lo, std_dev_hi).
 //
-//		The algorithm generates n_col cluster centers uniformly from the
-//		hypercube [-1,1]^d.  For each cluster, it selects the dimension
-//		of the subspace as a random number r between 1 and max_dim.
-//		These are the dimensions of the ellipsoid.  Then it generates
-//		a d-element std dev vector whose entries are the standard
-//		deviation for the coordinates of each cluster in the distribution.
-//		Among the d-element control vector, r randomly chosen values are
-//		chosen uniformly from the range [std_dev_lo, std_dev_hi].  The
-//		remaining values are set to std_dev_small.
+//		The algorithm generates n_clus cluster centers uniformly from
+//		the hypercube [-1,1]^d.  For each cluster, it selects the
+//		dimension of the subspace as a random number r between 1 and
+//		max_dim.  These are the dimensions of the ellipsoid.  Then it
+//		generates a d-element std dev vector whose entries are the
+//		standard deviation for the coordinates of each cluster in the
+//		distribution.  Among the d-element control vector, r randomly
+//		chosen values are chosen uniformly from the range [std_dev_lo,
+//		std_dev_hi].  The remaining values are set to std_dev_small.
 //
 //		Note that annClusGaussPts is a special case of this in which
 //		max_dim = 0, and std_dev = std_dev_small.
@@ -506,7 +504,7 @@ void annClusEllipsoids(			// clustered around ellipsoids
 	ANNpointArray		pa,				// point array (modified)
 	int					n,				// number of points
 	int					dim,			// dimension
-	int					n_col,			// number of colors
+	int					n_clus,			// number of colors
 	ANNbool				new_clust,		// generate new clusters.
 	double				std_dev_small,	// small standard deviation
 	double				std_dev_lo,		// low standard deviation for ellipses
@@ -522,15 +520,15 @@ void annClusEllipsoids(			// clustered around ellipsoids
 		if (std_dev != NULL)					// std deviations already exist
 			annDeallocPts(std_dev);				// get rid of them
 
-		centers = annAllocPts(n_col, dim);		// alloc new clusters and devs
-		std_dev	 = annAllocPts(n_col, dim);
+		centers = annAllocPts(n_clus, dim);		// alloc new clusters and devs
+		std_dev	 = annAllocPts(n_clus, dim);
 
-		for (int i = 0; i < n_col; i++) {		// gen cluster center coords
+		for (int i = 0; i < n_clus; i++) {		// gen cluster center coords
 			for (int d = 0; d < dim; d++) {
 				centers[i][d] = (ANNcoord) annRanUnif(-1,1);
 			}
 		}
-		for (int c = 0; c < n_col; c++) {		// generate cluster std dev
+		for (int c = 0; c < n_clus; c++) {		// generate cluster std dev
 			int n_dim = 1 + annRanInt(max_dim); // number of dimensions in flat
 			for (int d = 0; d < dim; d++) {		// generate std dev's
 												// prob. of picking next dim
@@ -548,10 +546,49 @@ void annClusEllipsoids(			// clustered around ellipsoids
 	}
 
 	int offset = 0;								// next slot to fill
-	for (int c = 0; c < n_col; c++) {			// generate clusters
-		int pick = (n+c)/n_col;					// number of points to pick
+	for (int c = 0; c < n_clus; c++) {			// generate clusters
+		int pick = (n+c)/n_clus;				// number of points to pick
 												// generate the points
 		genGauss(pa+offset, pick, dim, centers[c], std_dev[c]);
 		offset += pick;							// increment offset in array
+	}
+}
+
+//----------------------------------------------------------------------
+//	annPlanted - Generates points from a "planted" distribution
+//		In high dimensional spaces, interpoint distances tend to be
+//		highly clustered around the mean value.  Approximate nearest
+//		neighbor searching makes little sense in this context, unless it
+//		is the case that each query point is significantly closer to its
+//		nearest neighbor than to other points.  Thus, the query points
+//		should be planted close to the data points. Given a source data
+//		set, this procedure generates a set of query points having this
+//		property.
+//
+//		We are given a source data array and a standard deviation.  We
+//		generate points as follows.  We select a random point from the
+//		source data set, and we generate a Gaussian point centered about
+//		this random point and perturbed by a normal distributed random
+//		variable with mean zero and the given standard deviation along
+//		each coordinate.
+//
+//		Note that this essentially the same a clustered Gaussian
+//		distribution, but where the cluster centers are given by the
+//		source data set.
+//----------------------------------------------------------------------
+
+void annPlanted(				// planted nearest neighbors
+	ANNpointArray	pa,			// point array (modified)
+	int				n,			// number of points
+	int				dim,		// dimension
+	ANNpointArray	src,		// source point array
+	int				n_src,		// source size
+	double			std_dev)	// standard deviation about source
+{
+	for (int i = 0; i < n; i++) {
+		int c = annRanInt(n_src);			// generate source index
+		for (int d = 0; d < dim; d++) {
+		  pa[i][d] = (ANNcoord) (std_dev*annRanGauss() + src[c][d]);
+		}
 	}
 }

@@ -1,24 +1,31 @@
 //----------------------------------------------------------------------
 //	File:			rand.h
 //	Programmer:		Sunil Arya and David Mount
-//	Last modified:	03/04/98 (Release 0.1)
 //	Description:	Basic include file for random point generators
+//	Last modified:	08/04/06 (Version 1.1.1)
 //----------------------------------------------------------------------
-// Copyright (c) 1997-1998 University of Maryland and Sunil Arya and David
-// Mount.  All Rights Reserved.
+// Copyright (c) 1997-2005 University of Maryland and Sunil Arya and
+// David Mount.  All Rights Reserved.
 // 
-// This software and related documentation is part of the 
-// Approximate Nearest Neighbor Library (ANN).
+// This software and related documentation is part of the Approximate
+// Nearest Neighbor Library (ANN).  This software is provided under
+// the provisions of the Lesser GNU Public License (LGPL).  See the
+// file ../ReadMe.txt for further information.
 // 
-// Permission to use, copy, and distribute this software and its 
-// documentation is hereby granted free of charge, provided that 
-// (1) it is not a component of a commercial product, and 
-// (2) this notice appears in all copies of the software and
-//	   related documentation. 
-// 
-// The University of Maryland (U.M.) and the authors make no representations
-// about the suitability or fitness of this software for any purpose.  It is
-// provided "as is" without express or implied warranty.
+// The University of Maryland (U.M.) and the authors make no
+// representations about the suitability or fitness of this software for
+// any purpose.  It is provided "as is" without express or implied
+// warranty.
+//----------------------------------------------------------------------
+// History:
+//	Revision 0.1  03/04/98
+//		Initial release
+//	Revision 1.0  04/01/05
+//		Added annClusOrthFlats distribution
+//		Changed procedure names to avoid namespace conflicts
+//		Added annClusFlats distribution
+//	Revision 1.1.1  08/04/06
+//		Added planted distribution
 //----------------------------------------------------------------------
 
 #ifndef rand_H
@@ -89,7 +96,7 @@ void annClusGaussPts(			// clustered-Gaussian distribution
 	ANNpointArray	pa,			// point array (modified)
 	int				n,			// number of points
 	int				dim,		// dimension
-	int				n_col,		// number of colors (clusters)
+	int				n_clus,		// number of colors (clusters)
 	ANNbool			new_clust,	// generate new cluster centers
 	double			std_dev);	// standard deviation within clusters
 
@@ -97,7 +104,7 @@ void annClusOrthFlats(          // clustered along orthogonal flats
 	ANNpointArray	pa,			// point array (modified)
 	int				n,			// number of points
 	int				dim,		// dimension
-	int				n_col,		// number of colors
+	int				n_clus,		// number of colors
 	ANNbool			new_clust,	// generate new clusters.
 	double			std_dev,	// standard deviation within clusters
 	int				max_dim);	// maximum dimension of the flats
@@ -106,11 +113,19 @@ void annClusEllipsoids(			// clustered around ellipsoids
 	ANNpointArray	pa,			// point array (modified)
 	int				n,			// number of points
 	int				dim,		// dimension
-	int				n_col,		// number of colors
+	int				n_clus,		// number of colors
 	ANNbool			new_clust,	// generate new clusters.
 	double			std_dev_small,	// small standard deviation
 	double			std_dev_lo,	// low standard deviation for ellipses
 	double			std_dev_hi,	// high standard deviation for ellipses
 	int				max_dim);	// maximum dimension of the flats
+
+void annPlanted(				// planted nearest neighbors
+	ANNpointArray	pa,			// point array (modified)
+	int				n,			// number of points
+	int				dim,		// dimension
+	ANNpointArray	src,		// source point array
+	int				n_src,		// source size
+	double			std_dev);	// standard deviation about source
 
 #endif

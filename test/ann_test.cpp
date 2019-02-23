@@ -1,10 +1,10 @@
 //----------------------------------------------------------------------
-//	File:			ann_test.cpp
-//	Programmer:		Sunil Arya and David Mount
-//	Description:	test program for ANN (approximate nearest neighbors)
-//  Last modified:	05/03/05 (Version 1.1)
+// File:			ann_test.cpp
+// Programmer:		Sunil Arya and David Mount
+// Description:		test program for ANN (approximate nearest neighbors)
+// Last modified:	01/27/10 (Version 1.1.2)
 //----------------------------------------------------------------------
-// Copyright (c) 1997-2005 University of Maryland and Sunil Arya and
+// Copyright (c) 1997-2010 University of Maryland and Sunil Arya and
 // David Mount.  All Rights Reserved.
 // 
 // This software and related documentation is part of the Approximate
@@ -30,11 +30,16 @@
 //		Cleaned up C++ for modern compilers
 //	Revision 1.1  05/03/05
 //		Added fixed radius kNN search
+//	Revision 1.1.1 08/04/06
+//		Added planted distribution
+//	Revision 1.1.2  01/27/10
+//		Fixed minor compilation bugs for new versions of gcc
+//		Allow round-off error in validation test
 //----------------------------------------------------------------------
 
 #include <ctime>						// clock
 #include <cmath>						// math routines
-#include <string>						// C string ops
+#include <cstring>						// C string ops
 #include <fstream>						// file I/O
 
 #include <ANN/ANN.h>					// ANN declarations
@@ -161,10 +166,10 @@ using namespace std;					// make std:: available
 //								maximum number of points for storage
 //								allocation. Default = 100.
 //		query_size <int>		Same as data_size for query points.
-//		std_dev <float>			Standard deviation (used in gauss, and
-//								clustered distributions).  This is the
-//								"small" distribution for clus_ellipsoids.
-//								Default = 1.
+//		std_dev <float>			Standard deviation (used in gauss,
+//								planted, and clustered distributions).
+//								This is the "small" distribution for
+//								clus_ellipsoids.  Default = 1.
 //		std_dev_lo <float>		Low and high standard deviations (used in
 //		std_dev_hi <float>		clus_ellipsoids).  Default = 1.
 //		corr_coef <float>		Correlation coefficient (used in co-gauss
@@ -190,7 +195,8 @@ using namespace std;					// make std:: available
 //									clus_gauss	= clustered Gaussian
 //									clus_orth_flats = clusters of orth flats
 //									clus_ellipsoids = clusters of ellipsoids
-//								See the file rand.cc for further information.
+//									planted		= planted distribution
+//								See the file rand.cpp for further information.
 //
 // Options affecting nearest neighbor search:
 // ------------------------------------------
@@ -276,6 +282,7 @@ using namespace std;					// make std:: available
 
 const int		STRING_LEN		= 500;			// max string length
 const double	ERR				= 0.00001;		// epsilon (for float compares)
+const double	RND_OFF			= 5E-16;		// double round-off error
 
 //------------------------------------------------------------------------
 //	Enumerated values and conversions
@@ -320,6 +327,7 @@ typedef enum {					// distributions
 		CLUS_GAUSS,						// clustered Gaussian
 		CLUS_ORTH_FLATS,				// clustered on orthog flats
 		CLUS_ELLIPSOIDS,				// clustered on ellipsoids
+		PLANTED,						// planted distribution
 		N_DISTRIBS}
 		Distrib;
 
@@ -331,7 +339,8 @@ const char distr_table[N_DISTRIBS][STRING_LEN] = {
 		"co_laplace",					// CO_LAPLACE
 		"clus_gauss",					// CLUS_GAUSS
 		"clus_orth_flats",				// CLUS_ORTH_FLATS
-		"clus_ellipsoids"};				// CLUS_ELLIPSOIS
+		"clus_ellipsoids",				// CLUS_ELLIPSOIS
+		"planted"};						// PLANTED
 
 //------------------------------------------------------------------------
 //	Splitting rules for kd-trees (see ANN.h for types)
@@ -365,7 +374,7 @@ const char shrink_table[N_SHRINK_RULES][STRING_LEN] = {
 //----------------------------------------------------------------------
 
 void Error(								// error routine
-	char				*msg,			// error message
+	const char*			msg,			// error message
 	ANNerr				level)			// abort afterwards
 {
 	if (level == ANNabort) {
@@ -390,7 +399,7 @@ void printPoint(						// print point
 }
 
 int lookUp(								// look up name in table
-	const char	*arg,					// name to look up
+	const char*	arg,					// name to look up
 	const char	(*table)[STRING_LEN],	// name table
 	int			size)					// table size
 {
@@ -409,7 +418,9 @@ void generatePts(						// generate data/query points
 	ANNpointArray		&pa,			// point array (returned)
 	int					n,				// number of points
 	PtType				type,			// point type
-	ANNbool				new_clust);		// new cluster centers desired?
+	ANNbool				new_clust,		// new cluster centers desired?
+	ANNpointArray		src = NULL,		// source array (for PLANTED)
+	int					n_src = 0);		// source size (for PLANTED)
 
 void readPts(							// read data/query points from file
 	ANNpointArray		&pa,			// point array (returned)
@@ -774,6 +785,9 @@ int main(int argc, char** argv)
 		//	gen_data_pts operation
 		//----------------------------------------------------------------
 		else if (!strcmp(directive,"gen_data_pts")) {
+			if (distr == PLANTED) {				// planted distribution
+				Error("Cannot use planted distribution for data points", ANNabort);
+			}
 			generatePts(						// generate data points
 				data_pts,						// data points
 				data_size,						// data size
@@ -784,13 +798,30 @@ int main(int argc, char** argv)
 		}
 		//----------------------------------------------------------------
 		//	gen_query_pts operation
+		//		If the distribution is PLANTED, then the query points
+		//		are planted near the data points (which must already be
+		//		generated).
 		//----------------------------------------------------------------
 		else if (!strcmp(directive,"gen_query_pts")) {
-			generatePts(						// generate query points
-				query_pts,						// point array
-				query_size,						// number of query points
-				QUERY,							// query points
-				new_clust);						// new clusters flag
+			if (distr == PLANTED) {				// planted distribution
+				if (data_pts == NULL) {
+					Error("Must generate data points before query points for planted distribution", ANNabort);
+				}
+				generatePts(					// generate query points
+					query_pts,					// point array
+					query_size,					// number of query points
+					QUERY,						// query points
+					new_clust,					// new clusters flag
+					data_pts,					// plant around data pts
+					data_size);
+			}
+			else {								// all other distributions
+				generatePts(					// generate query points
+					query_pts,					// point array
+					query_size,					// number of query points
+					QUERY,						// query points
+					new_clust);					// new clusters flag
+			}
 			valid_dirty = ANNtrue;				// validation must be redone
 			new_clust = ANNfalse;				// reset flag
 		}
@@ -1161,7 +1192,9 @@ void generatePts(
 	ANNpointArray		&pa,			// point array (returned)
 	int					n,				// number of points to generate
 	PtType				type,			// point type
-	ANNbool				new_clust)		// new cluster centers desired?
+	ANNbool				new_clust,		// new cluster centers desired?
+	ANNpointArray		src,			// source array (if distr=PLANTED)
+	int					n_src)			// source size (if distr=PLANTED)
 {
 	if (pa != NULL) annDeallocPts(pa);			// get rid of any old points
 	pa = annAllocPts(n, dim);					// allocate point storage
@@ -1191,6 +1224,9 @@ void generatePts(
 		case CLUS_ELLIPSOIDS:					// clustered ellipsoids
 			annClusEllipsoids(pa, n, dim, n_color, new_clust, std_dev,
 						std_dev_lo, std_dev_hi, max_dim);
+			break;
+		case PLANTED:							// planted distribution
+			annPlanted(pa, n, dim, src, n_src, std_dev);
 			break;
 		default:
 			Error("INTERNAL ERROR: Unknown distribution", ANNabort);
@@ -1480,7 +1516,7 @@ void doValidation()						// perform validation
 				resultErr = (rept_dist - true_dist) / ((double) true_dist);
 			}
 
-			if (resultErr > epsilon && max_pts_visit == 0) {
+			if (resultErr > epsilon + RND_OFF && max_pts_visit == 0) {
 				Error("INTERNAL ERROR: Actual error exceeds epsilon",
 						ANNabort);
 			}

@@ -2,10 +2,25 @@
 # Makefile for the test and evaluation program
 #
 # ANN: Approximate Nearest Neighbors
-# Version: 0.1 (Beta release)
+# Version: 1.1.1 08/04/06
+#-----------------------------------------------------------------------------
+# Copyright (c) 1997-2005 University of Maryland and Sunil Arya and
+# David Mount.  All Rights Reserved.
+# 
+# This software and related documentation is part of the Approximate
+# Nearest Neighbor Library (ANN).  This software is provided under
+# the provisions of the Lesser GNU Public License (LGPL).  See the
+# file ../ReadMe.txt for further information.
+# 
+# The University of Maryland (U.M.) and the authors make no
+# representations about the suitability or fitness of this software for
+# any purpose.  It is provided "as is" without express or implied
+# warranty.
 #-----------------------------------------------------------------------------
 # Revision 0.1  03/04/98
 #	Initial release
+# Revision 1.1.1  08/04/06
+#	Added copyright/license
 #-----------------------------------------------------------------------------
 # Note: For full performance measurements, it is assumed that the library
 # and this program have both been compiled with the -DANN_PERF flag.  See
@@ -34,11 +49,9 @@ OTHERLIBS = -lm
 #-----------------------------------------------------------------------------
 # Some more definitions
 #		ANNTEST		name of test program
-#		PURIFTY		your purify (for memory leaks)
 #-----------------------------------------------------------------------------
 
 ANNTEST = ann_test
-PURIFY  = purify
 
 HEADERS = rand.h
 TESTSOURCES = ann_test.cpp rand.cpp
@@ -56,9 +69,6 @@ targets: $(BINDIR)/$(ANNTEST)
 $(BINDIR)/$(ANNTEST): $(TESTOBJECTS) $(LIBDIR)/$(ANNLIB)
 	$(C++) $(TESTOBJECTS) -o $(ANNTEST) $(LDFLAGS) $(ANNLIBS) $(OTHERLIBS)
 	mv $(ANNTEST) $(BINDIR)
-
-purify: $(TESTOBJECTS)
-	$(PURIFY) $(C++) $(TESTOBJECTS) -o $(ANNTEST) $(LDFLAGS) $(ANNLIBS) $(OTHERLIBS)
 
 #-----------------------------------------------------------------------------
 # configuration definitions

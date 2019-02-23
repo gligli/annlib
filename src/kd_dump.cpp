@@ -33,7 +33,7 @@
 
 #include "kd_tree.h"					// kd-tree declarations
 #include "bd_tree.h"					// bd-tree declarations
-#include <cstring>
+
 using namespace std;					// make std:: available
 
 //----------------------------------------------------------------------
@@ -439,7 +439,6 @@ static ANNkd_ptr annReadTree(
 	}
 	else {
 		annError("Illegal node type in dump file", ANNabort);
-		throw;								// to keep the compiler happy
+		exit(0);								// to keep the compiler happy
 	}
-        return NULL;
 }
