@@ -47,16 +47,6 @@ enum	{ANN_IN=0, ANN_OUT=1};	// shrinking indices
 								// what to do in case of error
 enum ANNerr {ANNwarn = 0, ANNabort = 1};
 
-//----------------------------------------------------------------------
-//	Maximum number of points to visit
-//	We have an option for terminating the search early if the
-//	number of points visited exceeds some threshold.  If the
-//	threshold is 0 (its default)  this means there is no limit
-//	and the algorithm applies its normal termination condition.
-//----------------------------------------------------------------------
-
-extern int		ANNmaxPtsVisited;	// maximum number of pts visited
-extern int		ANNptsVisited;		// number of pts visited in search
 
 //----------------------------------------------------------------------
 //	Global function declarations

@@ -29,6 +29,9 @@
 
 #include <ANN/ANNx.h>					// all ANN includes
 
+#include "pr_queue.h"
+#include "pr_queue_k.h"					// k-element priority queue
+
 using namespace std;					// make std:: available
 
 //----------------------------------------------------------------------
@@ -47,9 +50,9 @@ class ANNkd_node{						// generic kd-tree node (empty shell)
 public:
 	virtual ~ANNkd_node() {}					// virtual distroyer
 
-	virtual void ann_search(ANNdist) = 0;		// tree search
-	virtual void ann_pri_search(ANNdist) = 0;	// priority search
-	virtual void ann_FR_search(ANNdist) = 0;	// fixed-radius search
+	virtual void ann_search(ANNdist box_dist, ANNpointArray pts, ANNpoint q, double max_err, int dim, ANNmin_k * pointMK) = 0;		// tree search
+	virtual void ann_pri_search(ANNdist box_dist, ANNpointArray pts, ANNpoint q, double max_err, int dim, ANNmin_k * pointMK, ANNpr_queue * boxPQ) = 0;	// priority search
+	virtual void ann_FR_search(ANNdist box_dist, ANNpointArray pts, ANNpoint q, double max_err, int dim, ANNmin_k * pointMK, ANNdist sqRad, int * pir) = 0;	// fixed-radius search
 
 	virtual void getStats(						// get tree statistics
 				int dim,						// dimension of space
@@ -110,9 +113,9 @@ public:
 	virtual void print(int level, ostream &out);// print node
 	virtual void dump(ostream &out);			// dump node
 
-	virtual void ann_search(ANNdist);			// standard search
-	virtual void ann_pri_search(ANNdist);		// priority search
-	virtual void ann_FR_search(ANNdist);		// fixed-radius search
+	virtual void ann_search(ANNdist box_dist, ANNpointArray pts, ANNpoint q, double max_err, int dim, ANNmin_k * pointMK); // standard search
+	virtual void ann_pri_search(ANNdist box_dist, ANNpointArray pts, ANNpoint q, double max_err, int dim, ANNmin_k * pointMK, ANNpr_queue * boxPQ);		// priority search
+	virtual void ann_FR_search(ANNdist box_dist, ANNpointArray pts, ANNpoint q, double max_err, int dim, ANNmin_k * pointMK, ANNdist sqRad, int * pir);		// fixed-radius search
 };
 
 //----------------------------------------------------------------------
@@ -176,9 +179,9 @@ public:
 	virtual void print(int level, ostream &out);// print node
 	virtual void dump(ostream &out);			// dump node
 
-	virtual void ann_search(ANNdist);			// standard search
-	virtual void ann_pri_search(ANNdist);		// priority search
-	virtual void ann_FR_search(ANNdist);		// fixed-radius search
+	virtual void ann_search(ANNdist box_dist, ANNpointArray pts, ANNpoint q, double max_err, int dim, ANNmin_k * pointMK); // standard search
+	virtual void ann_pri_search(ANNdist box_dist, ANNpointArray pts, ANNpoint q, double max_err, int dim, ANNmin_k * pointMK, ANNpr_queue * boxPQ);		// priority search
+	virtual void ann_FR_search(ANNdist box_dist, ANNpointArray pts, ANNpoint q, double max_err, int dim, ANNmin_k * pointMK, ANNdist sqRad, int * pir);		// fixed-radius search
 };
 
 //----------------------------------------------------------------------

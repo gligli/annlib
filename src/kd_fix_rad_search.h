@@ -31,14 +31,4 @@
 
 #include <ANN/ANNperf.h>				// performance evaluation
 
-//----------------------------------------------------------------------
-//	Global variables
-//		These are active for the life of each call to
-//		annRangeSearch().  They are set to save the number of
-//		variables that need to be passed among the various search
-//		procedures.
-//----------------------------------------------------------------------
-
-extern ANNpoint			ANNkdFRQ;			// query point (static copy)
-
 #endif

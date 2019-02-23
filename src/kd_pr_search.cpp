@@ -67,20 +67,6 @@
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
-//		To keep argument lists short, a number of global variables
-//		are maintained which are common to all the recursive calls.
-//		These are given below.
-//----------------------------------------------------------------------
-
-double			ANNprEps;				// the error bound
-int				ANNprDim;				// dimension of space
-ANNpoint		ANNprQ;					// query point
-double			ANNprMaxErr;			// max tolerable squared error
-ANNpointArray	ANNprPts;				// the points
-ANNpr_queue		*ANNprBoxPQ;			// priority queue for boxes
-ANNmin_k		*ANNprPointMK;			// set of k closest points
-
-//----------------------------------------------------------------------
 //	annkPriSearch - priority search for k nearest neighbors
 //----------------------------------------------------------------------
 
@@ -92,58 +78,50 @@ void ANNkd_tree::annkPriSearch(
 	double				eps)			// error bound (ignored)
 {
 										// max tolerable squared error
-	ANNprMaxErr = ANN_POW(1.0 + eps);
+	double max_err = ANN_POW(1.0 + eps);
 	ANN_FLOP(2)							// increment floating ops
 
-	ANNprDim = dim;						// copy arguments to static equivs
-	ANNprQ = q;
-	ANNprPts = pts;
-	ANNptsVisited = 0;					// initialize count of points visited
-
-	ANNprPointMK = new ANNmin_k(k);		// create set for closest k points
+	ANNmin_k pointMK(k);		// create set for closest k points
 
 										// distance to root box
 	ANNdist box_dist = annBoxDistance(q,
 				bnd_box_lo, bnd_box_hi, dim);
 
-	ANNprBoxPQ = new ANNpr_queue(n_pts);// create priority queue for boxes
-	ANNprBoxPQ->insert(box_dist, root); // insert root in priority queue
+	ANNpr_queue boxPQ(n_pts);// create priority queue for boxes
+	boxPQ.insert(box_dist, root); // insert root in priority queue
 
-	while (ANNprBoxPQ->non_empty() &&
-		(!(ANNmaxPtsVisited != 0 && ANNptsVisited > ANNmaxPtsVisited))) {
+	while (boxPQ.non_empty() /*&&
+		(!(ANNmaxPtsVisited != 0 && ANNptsVisited > ANNmaxPtsVisited))*/) {
 		ANNkd_ptr np;					// next box from prior queue
 
 										// extract closest box from queue
-		ANNprBoxPQ->extr_min(box_dist, (void *&) np);
+		boxPQ.extr_min(box_dist, (void *&) np);
 
 		ANN_FLOP(2)						// increment floating ops
-		if (box_dist*ANNprMaxErr >= ANNprPointMK->max_key())
+		if (box_dist*max_err >= pointMK.max_key())
 			break;
 
-		np->ann_pri_search(box_dist);	// search this subtree.
+		np->ann_pri_search(box_dist, pts, q, max_err, dim, &pointMK, &boxPQ);	// search this subtree.
 	}
 
 	for (int i = 0; i < k; i++) {		// extract the k-th closest points
-		dd[i] = ANNprPointMK->ith_smallest_key(i);
-		nn_idx[i] = ANNprPointMK->ith_smallest_info(i);
+		dd[i] = pointMK.ith_smallest_key(i);
+		nn_idx[i] = pointMK.ith_smallest_info(i);
 	}
-
-	delete ANNprPointMK;				// deallocate closest point set
-	delete ANNprBoxPQ;					// deallocate priority queue
 }
 
 //----------------------------------------------------------------------
 //	kd_split::ann_pri_search - search a splitting node
 //----------------------------------------------------------------------
 
-void ANNkd_split::ann_pri_search(ANNdist box_dist)
+void ANNkd_split::ann_pri_search(ANNdist box_dist, ANNpointArray pts, ANNpoint q, double max_err, int dim, ANNmin_k * pointMK, ANNpr_queue * boxPQ)
 {
 	ANNdist new_dist;					// distance to child visited later
 										// distance to cutting plane
-	ANNcoord cut_diff = ANNprQ[cut_dim] - cut_val;
+	ANNcoord cut_diff = q[cut_dim] - cut_val;
 
 	if (cut_diff < 0) {					// left of cutting plane
-		ANNcoord box_diff = cd_bnds[ANN_LO] - ANNprQ[cut_dim];
+		ANNcoord box_diff = cd_bnds[ANN_LO] - q[cut_dim];
 		if (box_diff < 0)				// within bounds - ignore
 			box_diff = 0;
 										// distance to further box
@@ -151,12 +129,12 @@ void ANNkd_split::ann_pri_search(ANNdist box_dist)
 				ANN_DIFF(ANN_POW(box_diff), ANN_POW(cut_diff)));
 
 		if (child[ANN_HI] != KD_TRIVIAL)// enqueue if not trivial
-			ANNprBoxPQ->insert(new_dist, child[ANN_HI]);
+			boxPQ->insert(new_dist, child[ANN_HI]);
 										// continue with closer child
-		child[ANN_LO]->ann_pri_search(box_dist);
+		child[ANN_LO]->ann_pri_search(box_dist, pts, q, max_err, dim, pointMK, boxPQ);
 	}
 	else {								// right of cutting plane
-		ANNcoord box_diff = ANNprQ[cut_dim] - cd_bnds[ANN_HI];
+		ANNcoord box_diff = q[cut_dim] - cd_bnds[ANN_HI];
 		if (box_diff < 0)				// within bounds - ignore
 			box_diff = 0;
 										// distance to further box
@@ -164,9 +142,9 @@ void ANNkd_split::ann_pri_search(ANNdist box_dist)
 				ANN_DIFF(ANN_POW(box_diff), ANN_POW(cut_diff)));
 
 		if (child[ANN_LO] != KD_TRIVIAL)// enqueue if not trivial
-			ANNprBoxPQ->insert(new_dist, child[ANN_LO]);
+			boxPQ->insert(new_dist, child[ANN_LO]);
 										// continue with closer child
-		child[ANN_HI]->ann_pri_search(box_dist);
+		child[ANN_HI]->ann_pri_search(box_dist, pts, q, max_err, dim, pointMK, boxPQ);
 	}
 	ANN_SPL(1)							// one more splitting node visited
 	ANN_FLOP(8)							// increment floating ops
@@ -178,7 +156,7 @@ void ANNkd_split::ann_pri_search(ANNdist box_dist)
 //		This is virtually identical to the ann_search for standard search.
 //----------------------------------------------------------------------
 
-void ANNkd_leaf::ann_pri_search(ANNdist box_dist)
+void ANNkd_leaf::ann_pri_search(ANNdist box_dist, ANNpointArray pts, ANNpoint q, double max_err, int dim, ANNmin_k * pointMK, ANNpr_queue * boxPQ)
 {
 	register ANNdist dist;				// distance to data point
 	register ANNcoord* pp;				// data coordinate pointer
@@ -187,15 +165,15 @@ void ANNkd_leaf::ann_pri_search(ANNdist box_dist)
 	register ANNcoord t;
 	register int d;
 
-	min_dist = ANNprPointMK->max_key(); // k-th smallest distance so far
+	min_dist = pointMK->max_key(); // k-th smallest distance so far
 
 	for (int i = 0; i < n_pts; i++) {	// check points in bucket
 
-		pp = ANNprPts[bkt[i]];			// first coord of next data point
-		qq = ANNprQ;					// first coord of query point
+		pp = pts[bkt[i]];			// first coord of next data point
+		qq = q;					// first coord of query point
 		dist = 0;
 
-		for(d = 0; d < ANNprDim; d++) {
+		for(d = 0; d < dim; d++) {
 			ANN_COORD(1)				// one more coordinate hit
 			ANN_FLOP(4)					// increment floating ops
 
@@ -206,14 +184,13 @@ void ANNkd_leaf::ann_pri_search(ANNdist box_dist)
 			}
 		}
 
-		if (d >= ANNprDim &&					// among the k best?
+		if (d >= dim &&					// among the k best?
 		   (ANN_ALLOW_SELF_MATCH || dist!=0)) { // and no self-match problem
 												// add it to the list
-			ANNprPointMK->insert(dist, bkt[i]);
-			min_dist = ANNprPointMK->max_key();
+			pointMK->insert(dist, bkt[i]);
+			min_dist = pointMK->max_key();
 		}
 	}
 	ANN_LEAF(1)							// one more leaf node visited
 	ANN_PTS(n_pts)						// increment points visited
-	ANNptsVisited += n_pts;				// increment number of points visited
 }
