@@ -77,9 +77,9 @@ public:
 
 	~ANNbd_shrink()						// destructor
 		{
-			if (child[ANN_IN]!= NULL && child[ANN_IN]!=  KD_TRIVIAL) 
+			if (child[ANN_IN]!= NULL && child[ANN_IN]!=  &KD_TRIVIAL) 
 				delete child[ANN_IN];
-			if (child[ANN_OUT]!= NULL&& child[ANN_OUT]!= KD_TRIVIAL) 
+			if (child[ANN_OUT]!= NULL&& child[ANN_OUT]!= &KD_TRIVIAL) 
 				delete child[ANN_OUT];
 			if (bnds != NULL)
 				delete [] bnds;			// delete bounds

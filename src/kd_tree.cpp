@@ -25,7 +25,7 @@
 //		Fixed leaf counts to count trivial leaves.
 //		Added optional pa, pi arguments to Skeleton kd_tree constructor
 //			for use in load constructor.
-//		Added annClose() to eliminate KD_TRIVIAL memory leak.
+//		Added annClose() to eliminate &KD_TRIVIAL memory leak.
 //----------------------------------------------------------------------
 
 #include "kd_tree.h"					// kd-tree declarations
@@ -42,12 +42,12 @@
 //	contains no points.  For messy coding reasons it is convenient
 //	to have it reference a trivial point index.
 //
-//	KD_TRIVIAL is allocated when the first kd-tree is created.  It
+//	&KD_TRIVIAL is allocated when the first kd-tree is created.  It
 //	must *never* deallocated (since it may be shared by more than
 //	one tree).
 //----------------------------------------------------------------------
-static int				IDX_TRIVIAL[] = {0};	// trivial point index
-ANNkd_leaf				*KD_TRIVIAL = NULL;		// trivial leaf node
+static int				IDX_TRIVIAL[] = {0};				// trivial point index
+ANNkd_leaf				KD_TRIVIAL(0, IDX_TRIVIAL);	// trivial leaf node
 
 //----------------------------------------------------------------------
 //	Printing the kd-tree 
@@ -88,7 +88,7 @@ void ANNkd_leaf::print(					// print leaf node
 	for (int i = 0; i < level; i++)		// print indentation
 		out << "..";
 
-	if (this == KD_TRIVIAL) {			// canonical trivial leaf node
+	if (this == &KD_TRIVIAL) {			// canonical trivial leaf node
 		out << "Leaf (trivial)\n";
 	}
 	else{
@@ -151,7 +151,7 @@ void ANNkd_leaf::getStats(						// get subtree statistics
 {
 	st.reset();
 	st.n_lf = 1;								// count this leaf
-	if (this == KD_TRIVIAL) st.n_tl = 1;		// count trivial leaf
+	if (this == &KD_TRIVIAL) st.n_tl = 1;		// count trivial leaf
 	double ar = annAspectRatio(dim, bnd_box);	// aspect ratio of leaf
 												// incr sum (ignore outliers)
 	st.sum_ar += float(ar < ANN_AR_TOOBIG ? ar : ANN_AR_TOOBIG);
@@ -215,15 +215,11 @@ ANNkd_tree::~ANNkd_tree()				// tree destructor
 }
 
 //----------------------------------------------------------------------
-//	This is called with all use of ANN is finished.  It eliminates the
-//	minor memory leak caused by the allocation of KD_TRIVIAL.
+//	This is called with all use of ANN is finished.
 //----------------------------------------------------------------------
 void annClose()				// close use of ANN
 {
-	if (KD_TRIVIAL != NULL) {
-		delete KD_TRIVIAL;
-		KD_TRIVIAL = NULL;
-	}
+	// nothing
 }
 
 //----------------------------------------------------------------------
@@ -235,7 +231,7 @@ void annClose()				// close use of ANN
 //		allocated and initialized to the identity.	Warning: In
 //		either case the destructor will deallocate this array.
 //
-//		As a kludge, we need to allocate KD_TRIVIAL if one has not
+//		As a kludge, we need to allocate &KD_TRIVIAL if one has not
 //		already been allocated.	 (This is because I'm too dumb to
 //		figure out how to cause a pointer to be allocated at load
 //		time.)
@@ -266,8 +262,6 @@ void ANNkd_tree::SkeletonTree(			// construct skeleton tree
 	}
 
 	bnd_box_lo = bnd_box_hi = NULL;		// bounding box is nonexistent
-	if (KD_TRIVIAL == NULL)				// no trivial leaf node yet?
-		KD_TRIVIAL = new ANNkd_leaf(0, IDX_TRIVIAL);	// allocate it
 }
 
 ANNkd_tree::ANNkd_tree(					// basic constructor
@@ -322,7 +316,7 @@ ANNkd_ptr rkd_tree(				// recursive construction of kd-tree
 {
 	if (n <= bsp) {						// n small, make a leaf node
 		if (n == 0)						// empty leaf node
-			return KD_TRIVIAL;			// return (canonical) empty leaf
+			return &KD_TRIVIAL;			// return (canonical) empty leaf
 		else							// construct the node and return
 			return new ANNkd_leaf(n, pidx); 
 	}

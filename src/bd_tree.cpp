@@ -348,7 +348,7 @@ ANNkd_ptr rbd_tree(				// recursive construction of bd-tree
 
 	if (n <= bsp) {						// n small, make a leaf node
 		if (n == 0)						// empty leaf node
-			return KD_TRIVIAL;			// return (canonical) empty leaf
+			return &KD_TRIVIAL;			// return (canonical) empty leaf
 		else							// construct the node and return
 			return new ANNkd_leaf(n, pidx); 
 	}

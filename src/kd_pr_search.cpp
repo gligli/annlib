@@ -128,7 +128,7 @@ void ANNkd_split::ann_pri_search(ANNdist box_dist, ANNpointArray pts, ANNpoint q
 		new_dist = (ANNdist) ANN_SUM(box_dist,
 				ANN_DIFF(ANN_POW(box_diff), ANN_POW(cut_diff)));
 
-		if (child[ANN_HI] != KD_TRIVIAL)// enqueue if not trivial
+		if (child[ANN_HI] != &KD_TRIVIAL)// enqueue if not trivial
 			boxPQ->insert(new_dist, child[ANN_HI]);
 										// continue with closer child
 		child[ANN_LO]->ann_pri_search(box_dist, pts, q, max_err, dim, pointMK, boxPQ);
@@ -141,7 +141,7 @@ void ANNkd_split::ann_pri_search(ANNdist box_dist, ANNpointArray pts, ANNpoint q
 		new_dist = (ANNdist) ANN_SUM(box_dist,
 				ANN_DIFF(ANN_POW(box_diff), ANN_POW(cut_diff)));
 
-		if (child[ANN_LO] != KD_TRIVIAL)// enqueue if not trivial
+		if (child[ANN_LO] != &KD_TRIVIAL)// enqueue if not trivial
 			boxPQ->insert(new_dist, child[ANN_LO]);
 										// continue with closer child
 		child[ANN_HI]->ann_pri_search(box_dist, pts, q, max_err, dim, pointMK, boxPQ);

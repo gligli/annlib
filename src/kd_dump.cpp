@@ -144,7 +144,7 @@ void ANNkd_split::dump(					// dump a splitting node
 void ANNkd_leaf::dump(					// dump a leaf node
 		ostream &out)					// output stream
 {
-	if (this == KD_TRIVIAL) {			// canonical trivial leaf node
+	if (this == &KD_TRIVIAL) {			// canonical trivial leaf node
 		out << "leaf 0\n";				// leaf no points
 	}
 	else{
@@ -393,7 +393,7 @@ static ANNkd_ptr annReadTree(
 		in >> n_pts;							// input number of points
 		int old_idx = next_idx;					// save next_idx
 		if (n_pts == 0) {						// trivial leaf
-			return KD_TRIVIAL;
+			return &KD_TRIVIAL;
 		}
 		else {
 			for (int i = 0; i < n_pts; i++) {	// input point indices

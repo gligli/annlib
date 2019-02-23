@@ -119,7 +119,7 @@ public:
 };
 
 //----------------------------------------------------------------------
-//		KD_TRIVIAL is a special pointer to an empty leaf node. Since
+//		&KD_TRIVIAL is a special pointer to an empty leaf node. Since
 //		some splitting rules generate many (more than 50%) trivial
 //		leaves, we use this one shared node to save space.
 //
@@ -129,7 +129,7 @@ public:
 //		a small memory leak.
 //----------------------------------------------------------------------
 
-extern ANNkd_leaf *KD_TRIVIAL;					// trivial (empty) leaf node
+extern ANNkd_leaf KD_TRIVIAL;					// trivial (empty) leaf node
 
 //----------------------------------------------------------------------
 //	kd-tree splitting node.
@@ -166,9 +166,9 @@ public:
 
 	~ANNkd_split()						// destructor
 		{
-			if (child[ANN_LO]!= NULL && child[ANN_LO]!= KD_TRIVIAL)
+			if (child[ANN_LO]!= NULL && child[ANN_LO]!= &KD_TRIVIAL)
 				delete child[ANN_LO];
-			if (child[ANN_HI]!= NULL && child[ANN_HI]!= KD_TRIVIAL)
+			if (child[ANN_HI]!= NULL && child[ANN_HI]!= &KD_TRIVIAL)
 				delete child[ANN_HI];
 		}
 

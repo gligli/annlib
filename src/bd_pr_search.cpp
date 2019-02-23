@@ -46,13 +46,13 @@ void ANNbd_shrink::ann_pri_search(ANNdist box_dist, ANNpointArray pts, ANNpoint 
 		}
 	}
 	if (inner_dist <= box_dist) {				// if inner box is closer
-		if (child[ANN_OUT] != KD_TRIVIAL)		// enqueue outer if not trivial
+		if (child[ANN_OUT] != &KD_TRIVIAL)		// enqueue outer if not trivial
 			boxPQ->insert(box_dist,child[ANN_OUT]);
 												// continue with inner child
 		child[ANN_IN]->ann_pri_search(inner_dist, pts, q, max_err, dim, pointMK, boxPQ);
 	}
 	else {										// if outer box is closer
-		if (child[ANN_IN] != KD_TRIVIAL)		// enqueue inner if not trivial
+		if (child[ANN_IN] != &KD_TRIVIAL)		// enqueue inner if not trivial
 			boxPQ->insert(inner_dist,child[ANN_IN]);
 												// continue with outer child
 		child[ANN_OUT]->ann_pri_search(box_dist, pts, q, max_err, dim, pointMK, boxPQ);
