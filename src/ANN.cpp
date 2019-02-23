@@ -27,6 +27,7 @@
 //----------------------------------------------------------------------
 
 #include <cstdlib>						// C standard lib defs
+#include <ANN/ANN.h>
 #include <ANN/ANNx.h>					// all ANN includes
 #include <ANN/ANNperf.h>				// ANN performance 
 
@@ -178,24 +179,38 @@ void annError(const char* msg, ANNerr level)
 }
 
 //----------------------------------------------------------------------
-//	Limit on number of points visited
-//		We have an option for terminating the search early if the
-//		number of points visited exceeds some threshold.  If the
-//		threshold is 0 (its default)  this means there is no limit
-//		and the algorithm applies its normal termination condition.
-//		This is for applications where there are real time constraints
-//		on the running time of the algorithm.
+//	Gli: 'basic' procedural API
 //----------------------------------------------------------------------
 
-int	ANNmaxPtsVisited = 0;	// maximum number of pts visited
-int	ANNptsVisited;			// number of pts visited in search
-
-//----------------------------------------------------------------------
-//	Global function declarations
-//----------------------------------------------------------------------
-
-void annMaxPtsVisit(			// set limit on max. pts to visit in search
-	int					maxPts)			// the limit
+extern "C"
 {
-	ANNmaxPtsVisited = maxPts;
+	DLL_API void * ann_kdtree_create(double ** pa, int n, int dd, int bs, ANNsplitRule split)
+	{
+		return new ANNkd_tree(pa, n, dd, bs, split);
+	}
+
+	DLL_API void ann_kdtree_destroy(void * akd)
+	{
+		delete (ANNkd_tree *)akd;
+	}
+
+	DLL_API int ann_kdtree_search(void * akd, double * q, double eps)
+	{
+		int idx = -1;
+		double dd = 0.0;
+
+		((ANNkd_tree *)akd)->annkSearch(q, 1, &idx, &dd, eps);
+
+		return idx;
+	}
+
+	DLL_API int ann_kdtree_pri_search(void * akd, double * q, double eps)
+	{
+		int idx = -1;
+		double dd = 0.0;
+
+		((ANNkd_tree *)akd)->annkPriSearch(q, 1, &idx, &dd, eps);
+
+		return idx;
+	}
 }
