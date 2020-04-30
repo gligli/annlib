@@ -162,7 +162,7 @@ ANNcoord annSpread(				// compute point spread along dimension
 	for (int i = 1; i < n; i++) {
 		ANNcoord c = PA(i,d);
 		if (c < min) min = c;
-		else if (c > max) max = c;
+		if (c > max) max = c;
 	}
 	return (max - min);					// total spread is difference
 }
@@ -180,7 +180,7 @@ void annMinMax(					// compute min and max coordinates along dim
 	for (int i = 1; i < n; i++) {
 		ANNcoord c = PA(i,d);
 		if (c < min) min = c;
-		else if (c > max) max = c;
+		if (c > max) max = c;
 	}
 }
 
@@ -195,13 +195,31 @@ int annMaxSpread(						// compute dimension of max spread
 
 	if (n == 0) return max_dim;			// no points, who cares?
 
+	ANNcoord* mins = (ANNcoord *) _alloca(dim * sizeof(ANNcoord));
+	ANNcoord* maxs = (ANNcoord *) _alloca(dim * sizeof(ANNcoord));
+
+	for (int d = 0; d < dim; d++) {
+		mins[d] = PA(0, d);
+		maxs[d] = PA(0, d);
+	}
+
+	for (int i = 1; i < n; i++) {
+		ANNcoord* line = pa[pidx[i]];
+		for (int d = 0; d < dim; d++) {		// compute spread along each dim
+			ANNcoord c = line[d];
+			if (c < mins[d]) mins[d] = c;
+			if (c > maxs[d]) maxs[d] = c;
+		}
+	}
+
 	for (int d = 0; d < dim; d++) {		// compute spread along each dim
-		ANNcoord spr = annSpread(pa, pidx, n, d);
+		ANNcoord spr = (maxs[d] - mins[d]);
 		if (spr > max_spr) {			// bigger than current max
 			max_spr = spr;
 			max_dim = d;
 		}
 	}
+
 	return max_dim;
 }
 
