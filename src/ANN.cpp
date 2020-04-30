@@ -213,4 +213,13 @@ extern "C"
 
 		return idx;
 	}
+
+	DLL_API void ann_kdtree_search_multi(void * akd, int * idxs, int cnt, double * q, double eps)
+	{
+		double * dds = new double[cnt];
+
+		((ANNkd_tree *)akd)->annkSearch(q, cnt, idxs, dds, eps);
+
+		delete[] dds;
+	}
 }
