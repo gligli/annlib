@@ -36,7 +36,7 @@
 //	bd_shrink::ann_FR_search - search a shrinking node
 //----------------------------------------------------------------------
 
-void ANNbd_shrink::ann_FR_search(ANNdist box_dist, ANNpointArray pts, ANNpoint q, double max_err, int dim, ANNmin_k * pointMK, ANNdist sqRad, int * pir)
+void ANNbd_shrink::ann_FR_search(ANNdist box_dist, ANNpointArray pts, ANNpoint q, ANNfp max_err, int dim, ANNmin_k * pointMK, ANNdist sqRad, int * pir)
 {
 												// check dist calc term cond.
 

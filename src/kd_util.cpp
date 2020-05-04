@@ -49,7 +49,7 @@
 //		of a rectangle.
 //----------------------------------------------------------------------
 
-double annAspectRatio(
+ANNfp annAspectRatio(
 	int					dim,			// dimension
 	const ANNorthRect	&bnd_box)		// bounding cube
 {
@@ -289,7 +289,7 @@ void annMedianSplit(
 		PASWAP(n_lo-1, k);				// max among pa[0..n_lo-1] to pa[n_lo-1]
 	}
 										// cut value is midpoint value
-	cv = (PA(n_lo-1,d) + PA(n_lo,d))/2.0;
+	cv = (PA(n_lo-1,d) + PA(n_lo,d))/2.0f;
 }
 
 //----------------------------------------------------------------------

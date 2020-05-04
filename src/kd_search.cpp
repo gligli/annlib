@@ -79,14 +79,14 @@ void ANNkd_tree::annkSearch(
 	int					k,				// number of near neighbors to return
 	ANNidxArray			nn_idx,			// nearest neighbor indices (returned)
 	ANNdistArray		dd,				// the approximate nearest neighbor
-	double				eps)			// the error bound
+	ANNfp				eps)			// the error bound
 {
 
 	if (k > n_pts) {					// too many near neighbors?
 		annError("Requesting more near neighbors than data points", ANNabort);
 	}
 
-	double max_err = ANN_POW(1.0 + eps);
+	ANNfp max_err = ANN_POW(1.0f + eps);
 	ANN_FLOP(2)							// increment floating op count
 
 	ANNmin_k pointMK(k);
@@ -103,7 +103,7 @@ void ANNkd_tree::annkSearch(
 //	kd_split::ann_search - search a splitting node
 //----------------------------------------------------------------------
 
-void ANNkd_split::ann_search(ANNdist box_dist, ANNpointArray pts, ANNpoint q, double max_err, int dim, ANNmin_k * pointMK)
+void ANNkd_split::ann_search(ANNdist box_dist, ANNpointArray pts, ANNpoint q, ANNfp max_err, int dim, ANNmin_k * pointMK)
 {
 										// distance to cutting plane
 	ANNcoord cut_diff = q[cut_dim] - cut_val;
@@ -148,7 +148,7 @@ void ANNkd_split::ann_search(ANNdist box_dist, ANNpointArray pts, ANNpoint q, do
 //		some fine tuning to replace indexing by pointer operations.
 //----------------------------------------------------------------------
 
-void ANNkd_leaf::ann_search(ANNdist box_dist, ANNpointArray pts, ANNpoint q, double max_err, int dim, ANNmin_k * pointMK)
+void ANNkd_leaf::ann_search(ANNdist box_dist, ANNpointArray pts, ANNpoint q, ANNfp max_err, int dim, ANNmin_k * pointMK)
 {
 	register ANNdist dist;				// distance to data point
 	register ANNcoord* pp;				// data coordinate pointer

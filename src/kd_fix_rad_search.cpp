@@ -46,11 +46,11 @@ int ANNkd_tree::annkFRSearch(
 	int					k,				// number of near neighbors to return
 	ANNidxArray			nn_idx,			// nearest neighbor indices (returned)
 	ANNdistArray		dd,				// the approximate nearest neighbor
-	double				eps)			// the error bound
+	ANNfp				eps)			// the error bound
 {
 	int pir = 0;				// ...and points in the range
 
-	double max_err = ANN_POW(1.0 + eps);
+	ANNfp max_err = ANN_POW(1.0f + eps);
 	ANN_FLOP(2)							// increment floating op count
 
 	ANNmin_k pointMK(k);	// create set for closest k points
@@ -76,7 +76,7 @@ int ANNkd_tree::annkFRSearch(
 //		code structure for the sake of uniformity.
 //----------------------------------------------------------------------
 
-void ANNkd_split::ann_FR_search(ANNdist box_dist, ANNpointArray pts, ANNpoint q, double max_err, int dim, ANNmin_k * pointMK, ANNdist sqRad, int * pir)
+void ANNkd_split::ann_FR_search(ANNdist box_dist, ANNpointArray pts, ANNpoint q, ANNfp max_err, int dim, ANNmin_k * pointMK, ANNdist sqRad, int * pir)
 {
 										// check dist calc term condition
 
@@ -123,7 +123,7 @@ void ANNkd_split::ann_FR_search(ANNdist box_dist, ANNpointArray pts, ANNpoint q,
 //		some fine tuning to replace indexing by pointer operations.
 //----------------------------------------------------------------------
 
-void ANNkd_leaf::ann_FR_search(ANNdist box_dist, ANNpointArray pts, ANNpoint q, double max_err, int dim, ANNmin_k * pointMK, ANNdist sqRad, int * pir)
+void ANNkd_leaf::ann_FR_search(ANNdist box_dist, ANNpointArray pts, ANNpoint q, ANNfp max_err, int dim, ANNmin_k * pointMK, ANNdist sqRad, int * pir)
 {
 	register ANNdist dist;				// distance to data point
 	register ANNcoord* pp;				// data coordinate pointer

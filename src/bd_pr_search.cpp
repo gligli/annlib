@@ -36,7 +36,7 @@
 //	bd_shrink::ann_search - search a shrinking node
 //----------------------------------------------------------------------
 
-void ANNbd_shrink::ann_pri_search(ANNdist box_dist, ANNpointArray pts, ANNpoint q, double max_err, int dim, ANNmin_k * pointMK, ANNpr_queue * boxPQ)
+void ANNbd_shrink::ann_pri_search(ANNdist box_dist, ANNpointArray pts, ANNpoint q, ANNfp max_err, int dim, ANNmin_k * pointMK, ANNpr_queue * boxPQ)
 {
 	ANNdist inner_dist = 0;						// distance to inner box
 	for (int i = 0; i < n_bnds; i++) {			// is query point in the box?

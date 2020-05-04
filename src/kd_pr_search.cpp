@@ -75,10 +75,10 @@ void ANNkd_tree::annkPriSearch(
 	int					k,				// number of near neighbors to return
 	ANNidxArray			nn_idx,			// nearest neighbor indices (returned)
 	ANNdistArray		dd,				// dist to near neighbors (returned)
-	double				eps)			// error bound (ignored)
+	ANNfp				eps)			// error bound (ignored)
 {
 										// max tolerable squared error
-	double max_err = ANN_POW(1.0 + eps);
+	ANNfp max_err = ANN_POW(1.0f + eps);
 	ANN_FLOP(2)							// increment floating ops
 
 	ANNmin_k pointMK(k);		// create set for closest k points
@@ -114,7 +114,7 @@ void ANNkd_tree::annkPriSearch(
 //	kd_split::ann_pri_search - search a splitting node
 //----------------------------------------------------------------------
 
-void ANNkd_split::ann_pri_search(ANNdist box_dist, ANNpointArray pts, ANNpoint q, double max_err, int dim, ANNmin_k * pointMK, ANNpr_queue * boxPQ)
+void ANNkd_split::ann_pri_search(ANNdist box_dist, ANNpointArray pts, ANNpoint q, ANNfp max_err, int dim, ANNmin_k * pointMK, ANNpr_queue * boxPQ)
 {
 	ANNdist new_dist;					// distance to child visited later
 										// distance to cutting plane
@@ -156,7 +156,7 @@ void ANNkd_split::ann_pri_search(ANNdist box_dist, ANNpointArray pts, ANNpoint q
 //		This is virtually identical to the ann_search for standard search.
 //----------------------------------------------------------------------
 
-void ANNkd_leaf::ann_pri_search(ANNdist box_dist, ANNpointArray pts, ANNpoint q, double max_err, int dim, ANNmin_k * pointMK, ANNpr_queue * boxPQ)
+void ANNkd_leaf::ann_pri_search(ANNdist box_dist, ANNpointArray pts, ANNpoint q, ANNfp max_err, int dim, ANNmin_k * pointMK, ANNpr_queue * boxPQ)
 {
 	register ANNdist dist;				// distance to data point
 	register ANNcoord* pp;				// data coordinate pointer

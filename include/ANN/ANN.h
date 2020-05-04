@@ -96,7 +96,7 @@
 
 //----------------------------------------------------------------------
 // Limits
-// There are a number of places where we use the maximum double value as
+// There are a number of places where we use the maximum ANNfp value as
 // default initializers (and others may be used, depending on the
 // data/distance representation). These can usually be found in limits.h
 // (as LONG_MAX, INT_MAX) or in float.h (as DBL_MAX, FLT_MAX).
@@ -105,17 +105,27 @@
 // you should set the preprocessor symbol ANN_NO_LIMITS_H when
 // compiling, and modify the statements below to generate the
 // appropriate value. For practical purposes, this does not need to be
-// the maximum double value. It is sufficient that it be at least as
+// the maximum ANNfp value. It is sufficient that it be at least as
 // large than the maximum squared distance between between any two
 // points.
 //----------------------------------------------------------------------
+
 #ifdef ANN_NO_LIMITS_H					// limits.h unavailable
   #include <cvalues>					// replacement for limits.h
-  const double ANN_DBL_MAX = MAXDOUBLE;	// insert maximum double
+	typedef double ANNfp;
+	const double ANN_DBL_MAX = MAXDOUBLE;
+	const ANNfp ANN_FP_MAX = MAXDOUBLE;	// insert maximum ANNfp
 #else
   #include <climits>
   #include <cfloat>
-  const double ANN_DBL_MAX = DBL_MAX;
+	const double ANN_DBL_MAX = DBL_MAX;
+#if 0
+	typedef double ANNfp;
+	const ANNfp ANN_FP_MAX = DBL_MAX;
+#else
+	typedef float ANNfp;
+	const ANNfp ANN_FP_MAX = FLT_MAX;
+#endif
 #endif
 
 #define ANNversion 		"1.1.2"			// ANN version and information
@@ -145,18 +155,18 @@ enum ANNbool {ANNfalse = 0, ANNtrue = 1}; // ANN boolean type (non ANSI C++)
 //
 //		ANNcoord		ANNdist
 //		---------		-------------------------------
-//		short			short, int, long, float, double
-//		int				int, long, float, double
-//		long			long, float, double
-//		float			float, double
-//		double			double
+//		short			short, int, long, float, ANNfp
+//		int				int, long, float, ANNfp
+//		long			long, float, ANNfp
+//		float			float, ANNfp
+//		ANNfp			ANNfp
 //
 //		It is the user's responsibility to make sure that overflow does
 //		not occur in distance calculation.
 //----------------------------------------------------------------------
 
-typedef double	ANNcoord;				// coordinate data type
-typedef double	ANNdist;				// distance data type
+typedef ANNfp	ANNcoord;				// coordinate data type
+typedef ANNfp	ANNdist;				// distance data type
 
 //----------------------------------------------------------------------
 //	ANNidx
@@ -189,14 +199,14 @@ const ANNidx	ANN_NULL_IDX = -1;		// a NULL point index
 //
 //		ANNdist ANN_DIST_INF	Values (see <limits.h> or <float.h>)
 //		------- ------------	------------------------------------
-//		double	DBL_MAX			1.79769313486231570e+308
+//		ANNfp	DBL_MAX			1.79769313486231570e+308
 //		float	FLT_MAX			3.40282346638528860e+38
 //		long	LONG_MAX		0x7fffffffffffffff
 //		int		INT_MAX			0x7fffffff
 //		short	SHRT_MAX		0x7fff
 //----------------------------------------------------------------------
 
-const ANNdist	ANN_DIST_INF = ANN_DBL_MAX;
+const ANNdist	ANN_DIST_INF = ANN_FP_MAX;
 
 //----------------------------------------------------------------------
 //	Significant digits for tree dumps:
@@ -209,7 +219,7 @@ const ANNdist	ANN_DIST_INF = ANN_DBL_MAX;
 //
 //		ANNcoord ANNcoordPrec	Values (see <limits.h> or <float.h>)
 //		-------- ------------	------------------------------------
-//		double	 DBL_DIG		15
+//		ANNfp	 DBL_DIG		15
 //		float	 FLT_DIG		6
 //		long	 doesn't matter 19
 //		int		 doesn't matter 10
@@ -275,7 +285,7 @@ const ANNbool	ANN_ALLOW_SELF_MATCH	= ANNtrue;
 //
 //			**	POW:	ANNcoord				--> ANNdist
 //			**	#:		ANNdist x ANNdist		--> ANNdist
-//			**	ROOT:	ANNdist (>0)			--> double
+//			**	ROOT:	ANNdist (>0)			--> ANNfp
 //
 //		For early termination in distance calculation (partial distance
 //		calculation) we assume that POW and # together are monotonically
@@ -333,10 +343,18 @@ const ANNbool	ANN_ALLOW_SELF_MATCH	= ANNtrue;
 //----------------------------------------------------------------------
 //	Use the following for the Euclidean norm
 //----------------------------------------------------------------------
-#define ANN_POW(v)			((v)*(v))
-#define ANN_ROOT(x)			sqrt(x)
-#define ANN_SUM(x,y)		((x) + (y))
-#define ANN_DIFF(x,y)		((y) - (x))
+
+#if ANN_FP_MAX == ANN_DBL_MAX
+	#define ANN_POW(v)			((v)*(v))
+	#define ANN_ROOT(x)			sqrt(x)
+	#define ANN_SUM(x,y)		((x) + (y))
+	#define ANN_DIFF(x,y)		((y) - (x))
+#else
+	#define ANN_POW(v)			((v)*(v))
+	#define ANN_ROOT(x)			sqrtf(x)
+	#define ANN_SUM(x,y)		((x) + (y))
+	#define ANN_DIFF(x,y)		((y) - (x))
+#endif
 
 //----------------------------------------------------------------------
 //	Use the following for the L_1 (Manhattan) norm
@@ -497,7 +515,7 @@ public:
 		int				k,				// number of near neighbors to return
 		ANNidxArray		nn_idx,			// nearest neighbor array (modified)
 		ANNdistArray	dd,				// dist to near neighbors (modified)
-		double			eps=0.0			// error bound
+		ANNfp			eps=0.0			// error bound
 		) = 0;							// pure virtual (defined elsewhere)
 
 	virtual int annkFRSearch(			// approx fixed-radius kNN search
@@ -506,7 +524,7 @@ public:
 		int				k = 0,			// number of near neighbors to return
 		ANNidxArray		nn_idx = NULL,	// nearest neighbor array (modified)
 		ANNdistArray	dd = NULL,		// dist to near neighbors (modified)
-		double			eps=0.0			// error bound
+		ANNfp			eps=0.0			// error bound
 		) = 0;							// pure virtual (defined elsewhere)
 
 	virtual int theDim() = 0;			// return dimension of space
@@ -552,7 +570,7 @@ public:
 		int				k,				// number of near neighbors to return
 		ANNidxArray		nn_idx,			// nearest neighbor array (modified)
 		ANNdistArray	dd,				// dist to near neighbors (modified)
-		double			eps=0.0);		// error bound
+		ANNfp			eps=0.0);		// error bound
 
 	int annkFRSearch(					// approx fixed-radius kNN search
 		ANNpoint		q,				// query point
@@ -560,7 +578,7 @@ public:
 		int				k = 0,			// number of near neighbors to return
 		ANNidxArray		nn_idx = NULL,	// nearest neighbor array (modified)
 		ANNdistArray	dd = NULL,		// dist to near neighbors (modified)
-		double			eps=0.0);		// error bound
+		ANNfp			eps=0.0);		// error bound
 
 	int theDim()						// return dimension of space
 		{ return dim; }
@@ -743,14 +761,14 @@ public:
 		int				k,				// number of near neighbors to return
 		ANNidxArray		nn_idx,			// nearest neighbor array (modified)
 		ANNdistArray	dd,				// dist to near neighbors (modified)
-		double			eps=0.0);		// error bound
+		ANNfp			eps=0.0);		// error bound
 
 	void annkPriSearch( 				// priority k near neighbor search
 		ANNpoint		q,				// query point
 		int				k,				// number of near neighbors to return
 		ANNidxArray		nn_idx,			// nearest neighbor array (modified)
 		ANNdistArray	dd,				// dist to near neighbors (modified)
-		double			eps=0.0);		// error bound
+		ANNfp			eps=0.0);		// error bound
 
 	int annkFRSearch(					// approx fixed-radius kNN search
 		ANNpoint		q,				// the query point
@@ -758,7 +776,7 @@ public:
 		int				k,				// number of neighbors to return
 		ANNidxArray		nn_idx = NULL,	// nearest neighbor array (modified)
 		ANNdistArray	dd = NULL,		// dist to near neighbors (modified)
-		double			eps=0.0);		// error bound
+		ANNfp			eps=0.0);		// error bound
 
 	int theDim()						// return dimension of space
 		{ return dim; }

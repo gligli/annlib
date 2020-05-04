@@ -31,8 +31,8 @@
 //	Constants
 //----------------------------------------------------------------------
 
-const double ERR = 0.001;				// a small value
-const double FS_ASPECT_RATIO = 3.0;		// maximum allowed aspect ratio
+const ANNfp ERR = 0.001f;				// a small value
+const ANNfp FS_ASPECT_RATIO = 3.0f;		// maximum allowed aspect ratio
 										// in fair split. Must be >= 2.
 
 //----------------------------------------------------------------------
@@ -95,7 +95,7 @@ void midpt_split(
 	ANNcoord max_spread = -1;			// find long side with most spread
 	for (d = 0; d < dim; d++) {
 										// is it among longest?
-		if (double(bnds.hi[d] - bnds.lo[d]) >= (1-ERR)*max_length) {
+		if (ANNfp(bnds.hi[d] - bnds.lo[d]) >= (1-ERR)*max_length) {
 										// compute its spread
 			ANNcoord spr = annSpread(pa, pidx, n, d);
 			if (spr > max_spread) {		// is it max so far?
@@ -267,7 +267,7 @@ void fair_split(
 		ANNcoord length = bnds.hi[d] - bnds.lo[d];
 										// is this side midpoint splitable
 										// without violating aspect ratio?
-		if (((double) max_length)*2.0/((double) length) <= FS_ASPECT_RATIO) {
+		if (((ANNfp) max_length)*2.0/((ANNfp) length) <= FS_ASPECT_RATIO) {
 										// compute spread along this dim
 			ANNcoord spr = annSpread(pa, pidx, n, d);
 			if (spr > max_spread) {		// best spread so far
@@ -373,7 +373,7 @@ void sl_fair_split(
 		ANNcoord length = bnds.hi[d] - bnds.lo[d];
 										// is this side midpoint splitable
 										// without violating aspect ratio?
-		if (((double) max_length)*2.0/((double) length) <= FS_ASPECT_RATIO) {
+		if (((ANNfp) max_length)*2.0/((ANNfp) length) <= FS_ASPECT_RATIO) {
 										// compute spread along this dim
 			ANNcoord spr = annSpread(pa, pidx, n, d);
 			if (spr > max_spread) {		// best spread so far
