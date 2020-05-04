@@ -194,32 +194,30 @@ extern "C"
 		delete (ANNkd_tree *)akd;
 	}
 
-	DLL_API int ann_kdtree_search(void * akd, double * q, double eps)
+	DLL_API int ann_kdtree_search(void * akd, double * q, double eps, double * err)
 	{
 		int idx = -1;
 		double dd = 0.0;
 
 		((ANNkd_tree *)akd)->annkSearch(q, 1, &idx, &dd, eps);
 
+		if (err) *err = dd;
 		return idx;
 	}
 
-	DLL_API int ann_kdtree_pri_search(void * akd, double * q, double eps)
+	DLL_API int ann_kdtree_pri_search(void * akd, double * q, double eps, double * err)
 	{
 		int idx = -1;
 		double dd = 0.0;
 
 		((ANNkd_tree *)akd)->annkPriSearch(q, 1, &idx, &dd, eps);
 
+		if (err) *err = dd;
 		return idx;
 	}
 
-	DLL_API void ann_kdtree_search_multi(void * akd, int * idxs, int cnt, double * q, double eps)
+	DLL_API void ann_kdtree_search_multi(void * akd, int * idxs, double * errs, int cnt, double * q, double eps)
 	{
-		double * dds = new double[cnt];
-
-		((ANNkd_tree *)akd)->annkSearch(q, cnt, idxs, dds, eps);
-
-		delete[] dds;
+		((ANNkd_tree *)akd)->annkSearch(q, cnt, idxs, errs, eps);
 	}
 }
