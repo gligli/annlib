@@ -110,11 +110,30 @@
 // points.
 //----------------------------------------------------------------------
 
+//----------------------------------------------------------------------
+//	Significant digits for tree dumps:
+//		When floating point coordinates are used, the routine that dumps
+//		a tree needs to know roughly how many significant digits there
+//		are in a ANNcoord, so it can output points to full precision.
+//		This is defined to be ANNcoordPrec.  On most systems these
+//		values can be found in the standard include files <limits.h> or
+//		<float.h>.  For integer types, the value is essentially ignored.
+//
+//		ANNcoord ANNcoordPrec	Values (see <limits.h> or <float.h>)
+//		-------- ------------	------------------------------------
+//		ANNfp	 DBL_DIG		15
+//		float	 FLT_DIG		6
+//		long	 doesn't matter 19
+//		int		 doesn't matter 10
+//		short	 doesn't matter 5
+//----------------------------------------------------------------------
+
 #ifdef ANN_NO_LIMITS_H					// limits.h unavailable
   #include <cvalues>					// replacement for limits.h
 	typedef double ANNfp;
 	const double ANN_DBL_MAX = MAXDOUBLE;
 	const ANNfp ANN_FP_MAX = MAXDOUBLE;	// insert maximum ANNfp
+	const int	 ANNcoordPrec = 15;	// default precision
 #else
   #include <climits>
   #include <cfloat>
@@ -122,9 +141,11 @@
 #if 0
 	typedef double ANNfp;
 	const ANNfp ANN_FP_MAX = DBL_MAX;
+  const int	 ANNcoordPrec = 15;	// default precision
 #else
 	typedef float ANNfp;
 	const ANNfp ANN_FP_MAX = FLT_MAX;
+  const int	 ANNcoordPrec = 7;	// half precision
 #endif
 #endif
 
@@ -207,30 +228,6 @@ const ANNidx	ANN_NULL_IDX = -1;		// a NULL point index
 //----------------------------------------------------------------------
 
 const ANNdist	ANN_DIST_INF = ANN_FP_MAX;
-
-//----------------------------------------------------------------------
-//	Significant digits for tree dumps:
-//		When floating point coordinates are used, the routine that dumps
-//		a tree needs to know roughly how many significant digits there
-//		are in a ANNcoord, so it can output points to full precision.
-//		This is defined to be ANNcoordPrec.  On most systems these
-//		values can be found in the standard include files <limits.h> or
-//		<float.h>.  For integer types, the value is essentially ignored.
-//
-//		ANNcoord ANNcoordPrec	Values (see <limits.h> or <float.h>)
-//		-------- ------------	------------------------------------
-//		ANNfp	 DBL_DIG		15
-//		float	 FLT_DIG		6
-//		long	 doesn't matter 19
-//		int		 doesn't matter 10
-//		short	 doesn't matter 5
-//----------------------------------------------------------------------
-
-#ifdef DBL_DIG							// number of sig. bits in ANNcoord
-	const int	 ANNcoordPrec	= DBL_DIG;
-#else
-	const int	 ANNcoordPrec	= 15;	// default precision
-#endif
 
 //----------------------------------------------------------------------
 // Self match?
