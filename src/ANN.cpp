@@ -220,4 +220,9 @@ extern "C"
 	{
 		((ANNkd_tree *)akd)->annkSearch(q, cnt, idxs, errs, eps);
 	}
+
+	DLL_API void ann_kdtree_pri_search_multi(void* akd, int* idxs, ANNfp* errs, int cnt, ANNfp* q, ANNfp eps)
+	{
+		((ANNkd_tree*)akd)->annkPriSearch(q, cnt, idxs, errs, eps);
+	}
 }
