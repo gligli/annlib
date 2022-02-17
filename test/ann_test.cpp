@@ -281,8 +281,8 @@ using namespace std;					// make std:: available
 //------------------------------------------------------------------------
 
 const int		STRING_LEN		= 500;			// max string length
-const ANNfp	ERR				= 0.00001;		// epsilon (for float compares)
-const ANNfp	RND_OFF			= 5E-16;		// ANNfp round-off error
+const ANNfp	ERR				= 0.00001f;		// epsilon (for float compares)
+const ANNfp	RND_OFF			= 5E-16f;		// ANNfp round-off error
 
 //------------------------------------------------------------------------
 //	Enumerated values and conversions
@@ -448,7 +448,7 @@ const ANNbool	def_new_clust	= ANNfalse;		// def new clusters flag
 const int		def_max_dim		= 1;			// def max flat dimension
 const Distrib	def_distr		= UNIFORM;		// def distribution
 const ANNfp	def_std_dev		= 1.00;			// def standard deviation
-const ANNfp	def_corr_coef	= 0.05;			// def correlation coef
+const ANNfp	def_corr_coef	= 0.05f;			// def correlation coef
 const int		def_bucket_size = 1;			// def bucket size
 const ANNfp	def_epsilon		= 0.0;			// def error bound
 const int		def_near_neigh	= 1;			// def number of near neighbors
@@ -1025,7 +1025,7 @@ int main(int argc, char** argv)
 			apx_dists  = new ANNdist[near_neigh*query_size];
 			apx_pts_in_range = new int[query_size];
 
-			annMaxPtsVisit(max_pts_visit);		// set max points to visit
+			//annMaxPtsVisit(max_pts_visit);		// set max points to visit
 
 			//------------------------------------------------------------
 			//	Run the queries

@@ -152,7 +152,7 @@ static ANNfp annRanGauss()
 			v2 = annRanUnif(-1, 1);
 			r = v1 * v1 + v2 * v2;
 		}
-		ANNfp fac = sqrt(-2.0 * log(r) / r);
+		ANNfp fac = sqrtf(-2.0 * log(r) / r);
 		//-----------------------------------------------------------------
 		// Now make the Box-Muller transformation to get two normal
 		// deviates.  Return one and save the other for next time.
@@ -180,7 +180,7 @@ static ANNfp annRanGauss()
 
 static ANNfp annRanLaplace() 
 {
-	const ANNfp b = 1.4142136;
+	const ANNfp b = 1.4142136f;
 
 	ANNfp laprand = -log(annRan0()) / b;
 	ANNfp sign = annRan0();
@@ -253,7 +253,7 @@ void annCoGaussPts(				// correlated-Gaussian distribution
 	int					dim,			// dimension
 	ANNfp				correlation)	// correlation
 {
-	ANNfp std_dev_w = sqrt(1.0 - correlation * correlation);
+	ANNfp std_dev_w = sqrtf(1.0 - correlation * correlation);
 	for (int i = 0; i < n; i++) {
 		ANNfp previous = annRanGauss();
 		pa[i][0] = (ANNcoord) previous;

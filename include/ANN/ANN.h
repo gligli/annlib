@@ -831,14 +831,9 @@ public:
 
 //----------------------------------------------------------------------
 //	Other functions
-//	annMaxPtsVisit		Sets a limit on the maximum number of points
-//						to visit in the search.
 //  annClose			Can be called when all use of ANN is finished.
 //						It clears up a minor memory leak.
 //----------------------------------------------------------------------
-
-DLL_API void annMaxPtsVisit(	// max. pts to visit in search
-	int				maxPts);	// the limit
 
 DLL_API void annClose();		// called to end use of ANN
 
