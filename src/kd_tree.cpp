@@ -230,11 +230,6 @@ void annClose()				// close use of ANN
 //		assumed to be of the proper size (n).  Otherwise, one is
 //		allocated and initialized to the identity.	Warning: In
 //		either case the destructor will deallocate this array.
-//
-//		As a kludge, we need to allocate &KD_TRIVIAL if one has not
-//		already been allocated.	 (This is because I'm too dumb to
-//		figure out how to cause a pointer to be allocated at load
-//		time.)
 //----------------------------------------------------------------------
 
 void ANNkd_tree::SkeletonTree(			// construct skeleton tree
