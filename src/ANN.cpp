@@ -30,7 +30,6 @@
 #include <ANN/ANN.h>
 #include <ANN/ANNx.h>					// all ANN includes
 #include <ANN/ANNperf.h>				// ANN performance 
-#include "oneapi/tbb/tbbmalloc_proxy.h"
 
 using namespace std;					// make std:: accessible
 
