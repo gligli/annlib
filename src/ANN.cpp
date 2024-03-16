@@ -184,17 +184,19 @@ void annError(const char* msg, ANNerr level)
 
 extern "C"
 {
-	DLL_API void * ann_kdtree_create(ANNfp ** pa, int n, int dd, int bs, ANNsplitRule split)
+	#define DLL_API_C __declspec(dllexport)
+
+	DLL_API_C void * ann_kdtree_create(ANNfp ** pa, int n, int dd, int bs, ANNsplitRule split)
 	{
 		return new ANNkd_tree(pa, n, dd, bs, split);
 	}
 
-	DLL_API void ann_kdtree_destroy(void * akd)
+	DLL_API_C void ann_kdtree_destroy(void * akd)
 	{
 		delete (ANNkd_tree *)akd;
 	}
 
-	DLL_API int ann_kdtree_search(void * akd, ANNfp * q, ANNfp eps, ANNfp * err)
+	DLL_API_C int ann_kdtree_search(void * akd, ANNfp * q, ANNfp eps, ANNfp * err)
 	{
 		int idx = -1;
 		ANNfp dd = 0.0;
@@ -205,7 +207,7 @@ extern "C"
 		return idx;
 	}
 
-	DLL_API int ann_kdtree_pri_search(void * akd, ANNfp * q, ANNfp eps, ANNfp * err)
+	DLL_API_C int ann_kdtree_pri_search(void * akd, ANNfp * q, ANNfp eps, ANNfp * err)
 	{
 		int idx = -1;
 		ANNfp dd = 0.0;
@@ -216,12 +218,12 @@ extern "C"
 		return idx;
 	}
 
-	DLL_API void ann_kdtree_search_multi(void * akd, int * idxs, ANNfp * errs, int cnt, ANNfp * q, ANNfp eps)
+	DLL_API_C void ann_kdtree_search_multi(void * akd, int * idxs, ANNfp * errs, int cnt, ANNfp * q, ANNfp eps)
 	{
 		((ANNkd_tree *)akd)->annkSearch(q, cnt, idxs, errs, eps);
 	}
 
-	DLL_API void ann_kdtree_pri_search_multi(void* akd, int* idxs, ANNfp* errs, int cnt, ANNfp* q, ANNfp eps)
+	DLL_API_C void ann_kdtree_pri_search_multi(void* akd, int* idxs, ANNfp* errs, int cnt, ANNfp* q, ANNfp eps)
 	{
 		((ANNkd_tree*)akd)->annkPriSearch(q, cnt, idxs, errs, eps);
 	}
