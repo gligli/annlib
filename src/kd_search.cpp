@@ -26,6 +26,9 @@
 
 #include "kd_search.h"					// kd-search declarations
 
+#include "pmmintrin.h"
+
+
 //----------------------------------------------------------------------
 //	Approximate nearest neighbor searching by kd-tree search
 //		The kd-tree is searched for an approximate nearest neighbor.
@@ -165,7 +168,8 @@ void ANNkd_leaf::ann_search(ANNdist box_dist, ANNpointArray pts, ANNpoint q, ANN
 		qq = q;					// first coord of query point
 		dist = 0;
 
-		for(d = 0; d < dim; d++) {
+#if ANNcoordPrec > 7
+		for (d = 0; d < dim; d++) {
 			ANN_COORD(1)				// one more coordinate hit
 			ANN_FLOP(4)					// increment floating ops
 
@@ -175,6 +179,30 @@ void ANNkd_leaf::ann_search(ANNdist box_dist, ANNpointArray pts, ANNpoint q, ANN
 				break;
 			}
 		}
+#else
+		_CRT_UNUSED(t);
+
+		for (d = 0; d < (dim >> 2); d++) {
+			const __m128 qqq = _mm_loadu_ps(qq);
+			const __m128 ppp = _mm_loadu_ps(pp);
+			qq += 4;
+			pp += 4;
+
+			const __m128 qq_minus_pp = _mm_sub_ps(qqq, ppp);
+			const __m128 qq_minus_pp_sq = _mm_mul_ps(qq_minus_pp, qq_minus_pp);
+
+			const __m128 sumt = _mm_hadd_ps(qq_minus_pp_sq, qq_minus_pp_sq);
+			const __m128 sum = _mm_hadd_ps(sumt, sumt);
+
+			dist += sum.m128_f32[0];
+
+			if (dist > min_dist) {
+				break;
+			}
+		}
+
+		d <<= 2;
+#endif
 
 		if (d >= dim &&					// among the k best?
 		   (ANN_ALLOW_SELF_MATCH || dist!=0)) { // and no self-match problem

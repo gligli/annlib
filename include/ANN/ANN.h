@@ -138,7 +138,7 @@
   #include <climits>
   #include <cfloat>
 	const double ANN_DBL_MAX = DBL_MAX;
-#if 1
+#if 0
 	typedef double ANNfp;
 	const ANNfp ANN_FP_MAX = DBL_MAX;
   const int	 ANNcoordPrec = 15;	// default precision
