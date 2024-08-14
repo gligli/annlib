@@ -186,8 +186,8 @@ enum ANNbool {ANNfalse = 0, ANNtrue = 1}; // ANN boolean type (non ANSI C++)
 //		not occur in distance calculation.
 //----------------------------------------------------------------------
 
-typedef ANNfp	ANNcoord;				// coordinate data type
-typedef ANNfp	ANNdist;				// distance data type
+typedef signed short	ANNcoord;				// coordinate data type
+typedef unsigned int	ANNdist;				// distance data type
 
 //----------------------------------------------------------------------
 //	ANNidx
@@ -227,7 +227,7 @@ const ANNidx	ANN_NULL_IDX = -1;		// a NULL point index
 //		short	SHRT_MAX		0x7fff
 //----------------------------------------------------------------------
 
-const ANNdist	ANN_DIST_INF = ANN_FP_MAX;
+const ANNdist	ANN_DIST_INF = ULONG_MAX;
 
 //----------------------------------------------------------------------
 // Self match?

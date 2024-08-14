@@ -182,26 +182,26 @@ void ANNkd_leaf::ann_search(ANNdist box_dist, ANNpointArray pts, ANNpoint q, ANN
 #else
 		_CRT_UNUSED(t);
 
-		for (d = 0; d < (dim >> 2); d++) {
-			const __m128 qqq = _mm_loadu_ps(qq);
-			const __m128 ppp = _mm_loadu_ps(pp);
-			qq += 4;
-			pp += 4;
+		for (d = 0; d < (dim >> 3); d++) {
+			const __m128i qqq = _mm_loadu_si128((const __m128i *)qq);
+			const __m128i ppp = _mm_loadu_si128((const __m128i *)pp);
+			qq += 8;
+			pp += 8;
 
-			const __m128 qq_minus_pp = _mm_sub_ps(qqq, ppp);
-			const __m128 qq_minus_pp_sq = _mm_mul_ps(qq_minus_pp, qq_minus_pp);
+			const __m128i qq_minus_pp = _mm_subs_epi16(qqq, ppp);
+			const __m128i qq_minus_pp_sq = _mm_madd_epi16(qq_minus_pp, qq_minus_pp);
 
-			const __m128 sumt = _mm_hadd_ps(qq_minus_pp_sq, qq_minus_pp_sq);
-			const __m128 sum = _mm_hadd_ps(sumt, sumt);
+			const __m128i sumt = _mm_add_epi32(qq_minus_pp_sq, qq_minus_pp_sq);
+			const __m128i sum = _mm_add_epi32(sumt, sumt);
 
-			dist += sum.m128_f32[0];
+			dist += sum.m128i_u32[0];
 
 			if (dist > min_dist) {
 				break;
 			}
 		}
 
-		d <<= 2;
+		d <<= 3;
 #endif
 
 		if (d >= dim &&					// among the k best?
