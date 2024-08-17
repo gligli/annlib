@@ -26,7 +26,7 @@
 
 #include "kd_search.h"					// kd-search declarations
 
-#include "pmmintrin.h"
+#include "tmmintrin.h"
 
 
 //----------------------------------------------------------------------
@@ -182,7 +182,7 @@ void ANNkd_leaf::ann_search(ANNdist box_dist, ANNpointArray pts, ANNpoint q, ANN
 #else
 		_CRT_UNUSED(t);
 
-		for (d = 0; d < (dim >> 3); d++) {
+		for (d = 0; d < dim; d += 8) {
 			const __m128i qqq = _mm_loadu_si128((const __m128i *)qq);
 			const __m128i ppp = _mm_loadu_si128((const __m128i *)pp);
 			qq += 8;
@@ -191,8 +191,8 @@ void ANNkd_leaf::ann_search(ANNdist box_dist, ANNpointArray pts, ANNpoint q, ANN
 			const __m128i qq_minus_pp = _mm_subs_epi16(qqq, ppp);
 			const __m128i qq_minus_pp_sq = _mm_madd_epi16(qq_minus_pp, qq_minus_pp);
 
-			const __m128i sumt = _mm_add_epi32(qq_minus_pp_sq, qq_minus_pp_sq);
-			const __m128i sum = _mm_add_epi32(sumt, sumt);
+			const __m128i sumt = _mm_hadd_epi32(qq_minus_pp_sq, qq_minus_pp_sq);
+			const __m128i sum = _mm_hadd_epi32(sumt, sumt);
 
 			dist += sum.m128i_u32[0];
 
@@ -200,8 +200,6 @@ void ANNkd_leaf::ann_search(ANNdist box_dist, ANNpointArray pts, ANNpoint q, ANN
 				break;
 			}
 		}
-
-		d <<= 3;
 #endif
 
 		if (d >= dim &&					// among the k best?
